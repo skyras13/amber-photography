@@ -22,9 +22,16 @@ export async function GET(
     const bytes = readPhotoBytes(photo.filename);
     if (bytes) zip.file(photo.filename, bytes);
   }
-  const blob = await zip.generateAsync({ type: "uint8array" });
+  const zipped = await zip.generateAsync({ type: "uint8array" });
 
-  return new Response(blob, {
+  // Copy into a fresh ArrayBuffer-backed Uint8Array. jszip returns
+  // Uint8Array<ArrayBufferLike>, which strict lib types reject as a BodyInit
+  // (ArrayBufferLike could be a SharedArrayBuffer); this copy is concretely
+  // ArrayBuffer-backed and therefore a valid response body.
+  const body = new Uint8Array(zipped.length);
+  body.set(zipped);
+
+  return new Response(body, {
     headers: {
       "Content-Type": "application/zip",
       "Content-Disposition": `attachment; filename="${album.slug}.zip"`,
