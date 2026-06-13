@@ -1,65 +1,101 @@
-import Image from "next/image";
+import Link from "next/link";
+import SiteNav from "@/components/SiteNav";
+import SiteFooter from "@/components/SiteFooter";
+import { listAlbums } from "@/lib/store";
+
+export const dynamic = "force-dynamic";
 
 export default function Home() {
+  const publicAlbums = listAlbums("public").filter((a) => a.photos.length > 0);
+  const hero = publicAlbums.find((a) => a.featured) ?? publicAlbums[0];
+  const heroPhoto = hero?.photos.find((p) => p.id === hero.coverPhotoId) ?? hero?.photos[0];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="flex-1 flex flex-col">
+      <section className="relative h-[92vh] min-h-[540px] bg-ink">
+        <SiteNav overlay />
+        {heroPhoto && (
+          <img
+            src={`/api/photos/${heroPhoto.id}`}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover opacity-80"
+          />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/50" />
+        <div className="relative z-10 h-full flex flex-col items-center justify-center text-center text-white px-6">
+          <p className="fade-up text-[12px] uppercase tracking-label text-white/80 mb-5">
+            Weddings · Families · Seniors · Headshots
+          </p>
+          <h1 className="fade-up font-display text-5xl sm:text-7xl font-light leading-tight max-w-3xl">
+            Photographs that feel like the moment itself
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+          <div className="fade-up-delay mt-10 flex gap-4">
+            <Link
+              href="/galleries"
+              className="border border-white/70 px-8 py-3 text-[12px] uppercase tracking-label hover:bg-white hover:text-ink transition-colors"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              View galleries
+            </Link>
+            <Link
+              href="/contact"
+              className="bg-white text-ink px-8 py-3 text-[12px] uppercase tracking-label hover:bg-cream transition-colors"
             >
-              Learning
-            </a>{" "}
-            center.
+              Book a session
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-6 py-24 w-full">
+        <div className="flex items-end justify-between mb-10">
+          <div>
+            <p className="text-[12px] uppercase tracking-label text-bronze mb-2">Portfolio</p>
+            <h2 className="font-display text-4xl">Recent work</h2>
+          </div>
+          <Link
+            href="/galleries"
+            className="text-[12px] uppercase tracking-label text-ink-soft hover:text-ink"
+          >
+            All galleries →
+          </Link>
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {publicAlbums.slice(0, 6).map((album) => {
+            const cover =
+              album.photos.find((p) => p.id === album.coverPhotoId) ?? album.photos[0];
+            return (
+              <Link key={album.id} href={`/galleries/${album.slug}`} className="group block">
+                <div className="overflow-hidden aspect-[4/5] bg-line">
+                  <img
+                    src={`/api/photos/${cover.id}`}
+                    alt={album.title}
+                    loading="lazy"
+                    className="w-full h-full object-cover photo-hover group-hover:scale-[1.03]"
+                  />
+                </div>
+                <h3 className="font-display text-2xl mt-4">{album.title}</h3>
+                <p className="text-sm text-ink-soft mt-1">
+                  {album.photos.length} photographs
+                </p>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="bg-ink text-cream">
+        <div className="mx-auto max-w-4xl px-6 py-24 text-center">
+          <p className="text-[12px] uppercase tracking-label text-bronze mb-4">For clients</p>
+          <h2 className="font-display text-4xl mb-5">Your private gallery</h2>
+          <p className="text-cream/70 leading-relaxed max-w-xl mx-auto">
+            After your session, your photographs are delivered in a private,
+            PIN-protected online gallery where you can view, share, and download
+            every image in full resolution.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </section>
+
+      <SiteFooter />
     </div>
   );
 }

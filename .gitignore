@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local data (photos + db)
+data/
+
+# keep the env template (no secrets), ignore real env files
+!.env.example
+
+# local dev tooling config (machine-specific paths)
+.claude/
