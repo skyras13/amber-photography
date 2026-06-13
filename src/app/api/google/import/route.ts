@@ -7,7 +7,7 @@ import { imageDimensions, savePhotoBytes } from "@/lib/storage";
 export async function POST(request: Request) {
   if (!(await isAdmin())) return new Response("Unauthorized", { status: 401 });
   const { sessionId, albumId } = await request.json();
-  const album = getAlbumById(albumId);
+  const album = await getAlbumById(albumId);
   if (!album) return new Response("Album not found", { status: 404 });
 
   try {
@@ -18,9 +18,9 @@ export async function POST(request: Request) {
       const bytes = await downloadPickedItem(item);
       const photoId = id();
       const ext = path.extname(item.mediaFile.filename || "") || ".jpg";
-      const filename = savePhotoBytes(photoId, ext, bytes);
+      const filename = await savePhotoBytes(photoId, ext, bytes);
       const { width, height } = imageDimensions(bytes);
-      addPhoto(albumId, {
+      await addPhoto(albumId, {
         id: photoId,
         filename,
         width,

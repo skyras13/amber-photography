@@ -6,8 +6,8 @@ import { listAlbums } from "@/lib/store";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Galleries — Amber Rasmussen Photography" };
 
-export default function GalleriesPage() {
-  const albums = listAlbums("public").filter((a) => a.photos.length > 0);
+export default async function GalleriesPage() {
+  const albums = (await listAlbums("public")).filter((a) => a.photos.length > 0);
   return (
     <div className="flex-1 flex flex-col">
       <SiteNav />

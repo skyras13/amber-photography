@@ -8,7 +8,7 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
-  const album = getAlbumBySlug(slug);
+  const album = await getAlbumBySlug(slug);
   if (!album) return new Response("Not found", { status: 404 });
 
   // Client albums require the gallery PIN cookie (or an admin session)
@@ -19,8 +19,8 @@ export async function GET(
 
   const zip = new JSZip();
   for (const photo of album.photos) {
-    const bytes = readPhotoBytes(photo.filename);
-    if (bytes) zip.file(photo.filename, bytes);
+    const obj = await readPhotoBytes(photo.filename);
+    if (obj) zip.file(photo.filename, obj.bytes);
   }
   const zipped = await zip.generateAsync({ type: "uint8array" });
 

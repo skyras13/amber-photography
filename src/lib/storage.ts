@@ -1,27 +1,46 @@
 import fs from "fs";
 import path from "path";
+import { r2Enabled, r2Get, r2Put, r2Delete } from "./r2";
 
-// Local-disk storage for the prototype. In production swap for
-// Vercel Blob or Cloudflare R2 behind the same two functions.
+// Photo-file storage. Uses Cloudflare R2 when configured (see r2.ts),
+// otherwise falls back to local disk for development.
 const UPLOAD_DIR = path.join(process.cwd(), "data", "uploads");
+const R2_PREFIX = "photos/";
 
-export function savePhotoBytes(photoId: string, ext: string, bytes: Buffer): string {
-  if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+export async function savePhotoBytes(
+  photoId: string,
+  ext: string,
+  bytes: Buffer
+): Promise<string> {
   const filename = `${photoId}${ext.startsWith(".") ? ext : "." + ext}`;
+  if (r2Enabled()) {
+    await r2Put(R2_PREFIX + filename, new Uint8Array(bytes), contentTypeFor(filename));
+    return filename;
+  }
+  if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
   fs.writeFileSync(path.join(UPLOAD_DIR, filename), bytes);
   return filename;
 }
 
-export function readPhotoBytes(filename: string): Buffer | null {
+export async function readPhotoBytes(
+  filename: string
+): Promise<{ bytes: Uint8Array<ArrayBuffer>; contentType: string } | null> {
   // filename comes from the db, never from user input, but normalize anyway
   const safe = path.basename(filename);
+  if (r2Enabled()) {
+    return r2Get(R2_PREFIX + safe);
+  }
   const full = path.join(UPLOAD_DIR, safe);
   if (!fs.existsSync(full)) return null;
-  return fs.readFileSync(full);
+  return { bytes: new Uint8Array(fs.readFileSync(full)), contentType: contentTypeFor(safe) };
 }
 
-export function deletePhotoBytes(filename: string) {
+export async function deletePhotoBytes(filename: string): Promise<void> {
   const safe = path.basename(filename);
+  if (r2Enabled()) {
+    await r2Delete(R2_PREFIX + safe);
+    return;
+  }
   const full = path.join(UPLOAD_DIR, safe);
   if (fs.existsSync(full)) fs.unlinkSync(full);
 }

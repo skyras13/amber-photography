@@ -21,7 +21,7 @@ export default async function AdminAlbumPage({
 }) {
   if (!(await isAdmin())) redirect("/admin");
   const { id } = await params;
-  const album = getAlbumById(id);
+  const album = await getAlbumById(id);
   if (!album) notFound();
 
   const shareUrl =

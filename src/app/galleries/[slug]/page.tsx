@@ -12,7 +12,7 @@ export default async function AlbumPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const album = getAlbumBySlug(slug);
+  const album = await getAlbumBySlug(slug);
   if (!album || album.kind !== "public") notFound();
 
   return (

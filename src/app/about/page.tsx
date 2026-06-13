@@ -5,8 +5,8 @@ import { listAlbums } from "@/lib/store";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "About — Amber Rasmussen Photography" };
 
-export default function AboutPage() {
-  const albums = listAlbums("public").filter((a) => a.photos.length > 0);
+export default async function AboutPage() {
+  const albums = (await listAlbums("public")).filter((a) => a.photos.length > 0);
   const portrait = albums[0]?.photos[1] ?? albums[0]?.photos[0];
 
   return (

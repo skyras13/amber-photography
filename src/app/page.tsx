@@ -5,8 +5,8 @@ import { listAlbums } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
-export default function Home() {
-  const publicAlbums = listAlbums("public").filter((a) => a.photos.length > 0);
+export default async function Home() {
+  const publicAlbums = (await listAlbums("public")).filter((a) => a.photos.length > 0);
   const hero = publicAlbums.find((a) => a.featured) ?? publicAlbums[0];
   const heroPhoto = hero?.photos.find((p) => p.id === hero.coverPhotoId) ?? hero?.photos[0];
 

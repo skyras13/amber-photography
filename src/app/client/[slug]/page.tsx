@@ -17,14 +17,14 @@ export default async function ClientGalleryPage({
 }) {
   const { slug } = await params;
   const { error } = await searchParams;
-  const album = getAlbumBySlug(slug);
+  const album = await getAlbumBySlug(slug);
   if (!album || album.kind !== "client") notFound();
 
   const unlocked = await hasGalleryAccess(album.id);
 
   async function unlock(formData: FormData) {
     "use server";
-    const album = getAlbumBySlug(slug);
+    const album = await getAlbumBySlug(slug);
     if (!album) return;
     const pin = String(formData.get("pin") || "").trim();
     if (pin && pin === album.pin) {
