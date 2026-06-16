@@ -19,9 +19,14 @@ export async function readDb(): Promise<Db> {
     const text = await r2GetText(DB_KEY);
     return text ? (JSON.parse(text) as Db) : { ...EMPTY };
   }
-  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-  if (!fs.existsSync(DB_PATH)) return { ...EMPTY };
-  return JSON.parse(fs.readFileSync(DB_PATH, "utf8")) as Db;
+  // Read path must never write — serverless filesystems are read-only, so
+  // creating the data dir here would crash the render. Just read if present.
+  try {
+    if (!fs.existsSync(DB_PATH)) return { ...EMPTY };
+    return JSON.parse(fs.readFileSync(DB_PATH, "utf8")) as Db;
+  } catch {
+    return { ...EMPTY };
+  }
 }
 
 export async function writeDb(db: Db): Promise<void> {
